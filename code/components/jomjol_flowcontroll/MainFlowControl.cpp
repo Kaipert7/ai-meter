@@ -128,6 +128,11 @@ void doInit(void)
 #ifdef ENABLE_MQTT
     flowctrl.StartMQTTService();
 #endif // ENABLE_MQTT
+
+#ifdef ENABLE_LORAWAN
+    flowctrl.StartLorawanService();
+#endif // ENABLE_LORAWAN
+
 }
 
 bool doflow(void)

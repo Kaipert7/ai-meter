@@ -62,6 +62,12 @@ std::string ClassFlowControll::doSingleStep(std::string _stepname, std::string _
         }
     #endif //ENABLE_MQTT
 
+    #ifdef ENABLE_LORAWAN
+        if ((_stepname.compare("[LORAWAN]") == 0) || (_stepname.compare(";[LORAWAN]") == 0)) {
+            _classname = "ClassFlowLorawan";
+        }
+    #endif //ENABLE_MQTT
+
     #ifdef ENABLE_INFLUXDB
         if ((_stepname.compare("[InfluxDB]") == 0) || (_stepname.compare(";[InfluxDB]") == 0)) {
             _classname = "ClassFlowInfluxDB";
@@ -112,7 +118,13 @@ std::string ClassFlowControll::TranslateAktstatus(std::string _input)
             return ("Sending MQTT");
         }
     #endif //ENABLE_MQTT
-		
+
+    #ifdef ENABLE_MQTT
+        if (_input.compare("ClassFlowLorawan") == 0) {
+            return ("Sending Lorawan");
+        }
+    #endif //ENABLE_MQTT
+
     #ifdef ENABLE_INFLUXDB
         if (_input.compare("ClassFlowInfluxDB") == 0) {
             return ("Sending InfluxDB");
@@ -204,6 +216,19 @@ bool ClassFlowControll::StartMQTTService()
 }
 #endif //ENABLE_MQTT
 
+#ifdef ENABLE_LORAWAN
+bool ClassFlowControll::StartLorawanService() 
+{
+    /* Start the MQTT service */
+    for (int i = 0; i < FlowControll.size(); ++i) {
+        if (FlowControll[i]->name().compare("ClassFlowLorawan") == 0) {
+            return ((ClassFlowLorawan*) (FlowControll[i]))->Start();
+        }  
+    } 
+    return false;
+}
+#endif //ENABLE_Lorawan
+
 void ClassFlowControll::SetInitialParameter(void)
 {
     AutoStart = true;
@@ -265,6 +290,12 @@ ClassFlow* ClassFlowControll::CreateClassFlow(std::string _type)
         }
     #endif //ENABLE_MQTT
 	
+    #ifdef ENABLE_LORAWAN
+        if (toUpper(_type).compare("[LORAWAN]") == 0) {
+            cfc = new ClassFlowLorawan(&FlowControll);
+        }
+    #endif //ENABLE_MQTT
+	  
     #ifdef ENABLE_INFLUXDB
         if (toUpper(_type).compare("[INFLUXDB]") == 0) {
             cfc = new ClassFlowInfluxDB(&FlowControll);
@@ -318,7 +349,7 @@ void ClassFlowControll::InitFlow(std::string config)
     //#ifdef ENABLE_MQTT
         //MQTTPublish(mqttServer_getMainTopic() + "/" + "status", "Initialization", 1, false); // Right now, not possible -> MQTT Service is going to be started later
     //#endif //ENABLE_MQTT
-    
+
     string line;
     flowpostprocessing = NULL;
 

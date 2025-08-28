@@ -13,6 +13,10 @@
 #ifdef ENABLE_MQTT
 	#include "ClassFlowMQTT.h"
 #endif //ENABLE_MQTT
+#ifdef ENABLE_LORAWAN
+	#include "ClassFlowLorawan.h"
+#endif //ENABLE_LORAWAN
+
 #ifdef ENABLE_INFLUXDB
 	#include "ClassFlowInfluxDB.h"
 	#include "ClassFlowInfluxDBv2.h"
@@ -88,7 +92,9 @@ public:
 	#ifdef ENABLE_MQTT
 	bool StartMQTTService();
 	#endif //ENABLE_MQTT
-
+	#ifdef ENABLE_MQTT
+	bool StartLorawanService();
+	#endif
 	int CleanTempFolder();
 
 	string name(){return "ClassFlowControll";};

@@ -1442,6 +1442,49 @@
             <td>$TOOLTIP_Webhook_UploadImg</td>
         </tr>
 
+        <!------------- Lorawan ------------------>
+        <tr style="border-bottom: 2px solid lightgray;">
+            <td colspan="3" style="padding-left: 0px; padding-bottom: 3px;">
+                <h4>
+                <input type="checkbox" id="Category_Lorawan_enabled" value="1"  onclick = 'UpdateAfterCategoryCheck()' unchecked >
+                <label for=Category_Lorawan_enabled>Lorawan</label>
+                </h4>
+            </td>
+        </tr>
+
+        <tr class="LorawanItem">
+            <td class="indent1">
+                <input type="checkbox" id="Lorawan_DevEui_enabled" value="1"  onclick = 'InvertEnableItem("Lorawan", "DevEui")' unchecked >
+                <label for=Lorawan_DevEui_enabled><class id="Lorawan_DevEui_text" style="color:black;">DevEui</class></label>
+            </td>
+            <td>
+                <input required type="text" id="Lorawan_DevEui_value1">
+            </td>
+            <td>$TOOLTIP_Lorawan_DevEui</td>
+        </tr>
+
+        <tr class="LorawanItem">
+            <td class="indent1">
+                <input type="checkbox" id="Lorawan_AppEui_enabled" value="1"  onclick = 'InvertEnableItem("Lorawan", "AppEui")' unchecked >
+                <label for=Lorawan_AppEui_enabled><class id="Lorawan_AppEui_text" style="color:black;">AppEui</class></label>
+            </td>
+            <td>
+                <input required type="text" id="Lorawan_AppEui_value1">
+            </td>
+            <td>$TOOLTIP_Lorawan_AppEui</td>
+        </tr>
+
+        <tr class="LorawanItem">
+            <td class="indent1">
+                <input type="checkbox" id="Lorawan_AppKey_enabled" value="1"  onclick = 'InvertEnableItem("Lorawan", "AppKey")' unchecked >
+                <label for=Lorawan_AppKey_enabled><class id="Lorawan_AppKey_text" style="color:black;">AppKey</class></label>
+            </td>
+            <td>
+                <input required type="text" id="Lorawan_AppKey_value1">
+            </td>
+            <td>$TOOLTIP_Lorawan_AppKey</td>
+        </tr>
+
         <!------------- GPIO ------------------>
         <tr style="border-bottom: 2px solid lightgray;">
             <td colspan="3" style="padding-left: 0px; padding-bottom: 3px;">
@@ -2318,6 +2361,9 @@ function UpdateInput() {
     document.getElementById("Category_Webhook_enabled").checked = category["Webhook"]["enabled"];
     setVisible("WebhookItem", category["Webhook"]["enabled"]);
 
+    document.getElementById("Category_Lorawan_enabled").checked = category["Lorawan"]["enabled"];
+    setVisible("LorawanItem", category["Lorawan"]["enabled"]);
+
     WriteParameter(param, category, "TakeImage", "RawImagesLocation", true);
     WriteParameter(param, category, "TakeImage", "RawImagesRetention", true);
 
@@ -2403,6 +2449,10 @@ function UpdateInput() {
     WriteParameter(param, category, "Webhook", "ApiKey", true);
     WriteParameter(param, category, "Webhook", "UploadImg", false);
 
+    WriteParameter(param, category, "Lorawan", "DevEui", true);	
+    WriteParameter(param, category, "Lorawan", "AppEui", true);
+    WriteParameter(param, category, "Lorawan", "AppKey", true);
+
     WriteParameter(param, category, "GPIO", "IO0", true);
     WriteParameter(param, category, "GPIO", "IO1", true);
     WriteParameter(param, category, "GPIO", "IO3", true);
@@ -2486,6 +2536,7 @@ function ReadParameterAll() {
     category["InfluxDBv2"]["enabled"] = document.getElementById("Category_InfluxDBv2_enabled").checked;
     category["Webhook"]["enabled"] = document.getElementById("Category_Webhook_enabled").checked;
     category["GPIO"]["enabled"] = document.getElementById("Category_GPIO_enabled").checked;
+    category["Lorawan"]["enabled"] = document.getElementById("Category_Lorawan_enabled").checked;
 
     ReadParameter(param, "TakeImage", "RawImagesLocation", true);
     ReadParameter(param, "TakeImage", "RawImagesRetention", true);
@@ -2572,6 +2623,10 @@ function ReadParameterAll() {
     ReadParameter(param, "Webhook", "ApiKey", true);
     ReadParameter(param, "Webhook", "UploadImg", false);
 
+    ReadParameter(param, "Lorawan", "DevEui", true);	
+    ReadParameter(param, "Lorawan", "AppEui", true);
+    ReadParameter(param, "Lorawan", "AppKey", true);
+
     ReadParameter(param, "GPIO", "IO0", true);
     ReadParameter(param, "GPIO", "IO1", true);
     ReadParameter(param, "GPIO", "IO3", true);
@@ -2622,6 +2677,8 @@ function UpdateAfterCategoryCheck() {
     category["InfluxDBv2"]["enabled"] = document.getElementById("Category_InfluxDBv2_enabled").checked;
     category["GPIO"]["enabled"] = document.getElementById("Category_GPIO_enabled").checked;
     category["Webhook"]["enabled"] = document.getElementById("Category_Webhook_enabled").checked;
+    category["Lorawan"]["enabled"] = document.getElementById("Category_Lorawan_enabled").checked;
+    
 
     UpdateInput();
     var sel = document.getElementById("Numbers_value1");

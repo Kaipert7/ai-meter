@@ -238,6 +238,15 @@ function ParseConfig() {
     ParamAddValue(param, catname, "ApiKey");
     ParamAddValue(param, catname, "UploadImg");
 
+    var catname = "Lorawan";
+    category[catname] = new Object();
+    category[catname]["enabled"] = false;
+    category[catname]["found"] = false;
+    param[catname] = new Object();
+    ParamAddValue(param, catname, "DevEui");
+    ParamAddValue(param, catname, "AppEui");
+    ParamAddValue(param, catname, "AppKey");
+
     var catname = "GPIO";
     category[catname] = new Object();
     category[catname]["enabled"] = false;
@@ -247,7 +256,7 @@ function ParseConfig() {
     ParamAddValue(param, catname, "IO1", 6, false, "",  [null, null, /^[0-9]*$/, null, null, /^[a-zA-Z0-9_-]*$/]);
     ParamAddValue(param, catname, "IO3", 6, false, "",  [null, null, /^[0-9]*$/, null, null, /^[a-zA-Z0-9_-]*$/]);
     ParamAddValue(param, catname, "IO4", 6, false, "",  [null, null, /^[0-9]*$/, null, null, /^[a-zA-Z0-9_-]*$/]);
-    ParamAddValue(param, catname, "IO47", 6, false, "",  [null, null, /^[0-9]*$/, null, null, /^[a-zA-Z0-9_-]*$/]);
+    ParamAddValue(param, catname, "IO12", 6, false, "",  [null, null, /^[0-9]*$/, null, null, /^[a-zA-Z0-9_-]*$/]);
     ParamAddValue(param, catname, "IO13", 6, false, "",  [null, null, /^[0-9]*$/, null, null, /^[a-zA-Z0-9_-]*$/]);
     ParamAddValue(param, catname, "LEDType");
     ParamAddValue(param, catname, "LEDNumbers");
@@ -266,6 +275,7 @@ function ParseConfig() {
     param[catname] = new Object();
     //ParamAddValue(param, catname, "AutoStart");
     ParamAddValue(param, catname, "Interval");     
+    ParamAddValue(param, catname, "SleepWhileIdle");     
 
     var catname = "DataLogging";
     category[catname] = new Object();
