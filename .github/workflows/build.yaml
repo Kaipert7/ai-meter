@@ -313,27 +313,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ./code/.pio/build/esp32s3-aleksei/firmware.bin
-            ./code/.pio/build/esp32s3-aleksei/partitions.bin
-            ./code/.pio/build/esp32s3-aleksei/bootloader.bin
-        key: generated-files-${{ github.run_id }}
-        restore-keys: generated-files
-      - name: Prepare manual_setup_s3
-        run: |
-          rm -rf manual_setup_s3
-          mkdir -p manual_setup_s3
-          cp -f "./code/.pio/build/esp32s3-aleksei/firmware.bin"   "manual_setup_s3/firmware.bin"
-          cp -f "./code/.pio/build/esp32s3-aleksei/bootloader.bin" "manual_setup_s3/bootloader.bin"
-          cp -f "./code/.pio/build/esp32s3-aleksei/partitions.bin" "manual_setup_s3/partitions.bin"
-      - name: Upload manual_setup_s3
-        uses: actions/upload-artifact@v4
-        with:
-          name: "AI-on-the-edge-device__manual-setup-s3__${{ github.ref_name }}_(${{ github.sha }})"
-          path: ./manual_setup_s3
+    - uses: actions/checkout@v4
+    - uses: actions/cache@v4
+      with:
+        path: |
+          ./code/.pio/build/esp32s3-aleksei/firmware.bin
+          ./code/.pio/build/esp32s3-aleksei/partitions.bin
+          ./code/.pio/build/esp32s3-aleksei/bootloader.bin
+      key: generated-files-${{ github.run_id }}
+      restore-keys: generated-files
+    - name: Prepare manual_setup_s3
+      run: |
+        rm -rf manual_setup_s3
+        mkdir -p manual_setup_s3
+        cp -f "./code/.pio/build/esp32s3-aleksei/firmware.bin"   "manual_setup_s3/firmware.bin"
+        cp -f "./code/.pio/build/esp32s3-aleksei/bootloader.bin" "manual_setup_s3/bootloader.bin"
+        cp -f "./code/.pio/build/esp32s3-aleksei/partitions.bin" "manual_setup_s3/partitions.bin"
+    - name: Upload manual_setup_s3
+      uses: actions/upload-artifact@v4
+      with:
+        name: "AI-on-the-edge-device__manual-setup-s3__${{ github.ref_name }}_(${{ github.sha }})"
+        path: ./manual_setup_s3
 
 #########################################################################################
 ## Prepare and create release
