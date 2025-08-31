@@ -107,18 +107,23 @@ jobs:
         mkdir demo
         cp -r ./sd-card/demo/* ./demo/
 
-    - name: Upload ESP32 & S3 build artifacts
+    - name: Stage build outputs for artifacts
+      run: |
+        set -euo pipefail
+        mkdir -p out/esp32 out/s3
+        cp code/.pio/build/esp32cam/firmware.bin    out/esp32/firmware.bin
+        cp code/.pio/build/esp32cam/bootloader.bin  out/esp32/bootloader.bin
+        cp code/.pio/build/esp32cam/partitions.bin  out/esp32/partitions.bin
+        cp code/.pio/build/esp32s3-aleksei/firmware.bin   out/s3/firmware.bin
+        cp code/.pio/build/esp32s3-aleksei/bootloader.bin out/s3/bootloader.bin
+        cp code/.pio/build/esp32s3-aleksei/partitions.bin out/s3/partitions.bin
+
+    - name: Upload build artifacts (staged)
       uses: actions/upload-artifact@v4
       with:
         name: build-binaries
         if-no-files-found: error
-        path: |
-          code/.pio/build/esp32cam/firmware.bin
-          code/.pio/build/esp32cam/bootloader.bin
-          code/.pio/build/esp32cam/partitions.bin
-          code/.pio/build/esp32s3-aleksei/firmware.bin
-          code/.pio/build/esp32s3-aleksei/bootloader.bin
-          code/.pio/build/esp32s3-aleksei/partitions.bin
+        path: out/**
 
 
 #########################################################################################
@@ -175,7 +180,7 @@ jobs:
       run: |
         rm -rf ./update
         mkdir -p ./update
-        cp "./code/.pio/build/esp32cam/firmware.bin" "update/firmware.bin"
+        cp ./out/esp32/firmware.bin update/firmware.bin
 
     - name: Add Web UI to update
       run: cp -r ./html ./update/
@@ -320,9 +325,9 @@ jobs:
         rm -rf release
         mkdir -p release
         # copy builds to manual_setup folder
-        cp -f "./code/.pio/build/esp32cam/firmware.bin" "manual_setup/firmware.bin"
-        cp -f "./code/.pio/build/esp32cam/bootloader.bin" "manual_setup/bootloader.bin"
-        cp -f "./code/.pio/build/esp32cam/partitions.bin" "manual_setup/partitions.bin"
+        cp -f ./out/esp32/firmware.bin   manual_setup/firmware.bin
+        cp -f ./out/esp32/bootloader.bin manual_setup/bootloader.bin
+        cp -f ./out/esp32/partitions.bin manual_setup/partitions.bin
         rm -rf ./sd-card/html
         rm -rf ./sd-card/demo
         cp -r ./html ./sd-card/ # Overwrite the Web UI with the preprocessed files
@@ -360,9 +365,9 @@ jobs:
       run: |
         rm -rf manual_setup_s3
         mkdir -p manual_setup_s3
-        cp -f "./code/.pio/build/esp32s3-aleksei/firmware.bin"   "manual_setup_s3/firmware.bin"
-        cp -f "./code/.pio/build/esp32s3-aleksei/bootloader.bin" "manual_setup_s3/bootloader.bin"
-        cp -f "./code/.pio/build/esp32s3-aleksei/partitions.bin" "manual_setup_s3/partitions.bin"
+        cp -f ./out/s3/firmware.bin   manual_setup_s3/firmware.bin
+        cp -f ./out/s3/bootloader.bin manual_setup_s3/bootloader.bin
+        cp -f ./out/s3/partitions.bin manual_setup_s3/partitions.bin
     - name: Upload manual_setup_s3
       uses: actions/upload-artifact@v4
       with:
@@ -397,19 +402,19 @@ jobs:
       with:
         name: update
         path: update
-    
+
     - name: Download manual_setup artifact
       uses: actions/download-artifact@v4
       with:
         name: manual_setup
         path: manual_setup
-    
+
     - name: Download remote_setup artifact
       uses: actions/download-artifact@v4
       with:
         name: remote_setup
         path: remote_setup
-    
+
     - name: Download manual_setup_s3 artifact
       uses: actions/download-artifact@v4
       with:
