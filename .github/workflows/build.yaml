@@ -125,49 +125,6 @@ jobs:
         if-no-files-found: error
         path: out
 
-    - name: Verify PlatformIO outputs
-      run: |
-        set -euo pipefail
-        echo "::group::Expected PIO outputs"
-        for f in \
-          code/.pio/build/esp32cam/firmware.bin \
-          code/.pio/build/esp32cam/bootloader.bin \
-          code/.pio/build/esp32cam/partitions.bin \
-          code/.pio/build/esp32s3-aleksei/firmware.bin \
-          code/.pio/build/esp32s3-aleksei/bootloader.bin \
-          code/.pio/build/esp32s3-aleksei/partitions.bin
-        do
-          if [[ -f "$f" ]]; then
-            printf "✅ %s (%s bytes)\n" "$f" "$(stat -c%s "$f")"
-          else
-            echo "❌ MISSING $f" >&2
-            exit 1
-          fi
-        done
-        echo "::endgroup::"
-    - name: Verify downloaded artifact layout
-      run: |
-        set -euo pipefail
-        echo "::group::Tree under ./out"
-        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
-        echo "::endgroup::"
-    
-        for f in \
-          out/esp32/firmware.bin \
-          out/esp32/bootloader.bin \
-          out/esp32/partitions.bin \
-          out/s3/firmware.bin \
-          out/s3/bootloader.bin \
-          out/s3/partitions.bin
-        do
-          if [[ -f "$f" ]]; then
-            printf "✅ %s (%s bytes)\n" "$f" "$(stat -c%s "$f")"
-          else
-            echo "❌ MISSING $f" >&2
-            echo "Hint: ensure download-artifact uses 'path: out' so layout matches ./out/esp32 and ./out/s3" >&2
-            exit 1
-          fi
-        done
 
 
 #########################################################################################
@@ -190,7 +147,22 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-binaries
-        path: .
+        path: out
+    - name: Verify downloaded binaries
+      run: |
+        set -Eeuo pipefail
+        echo "Contents under ./out:"
+        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
+        for f in \
+          out/esp32/firmware.bin \
+          out/esp32/bootloader.bin \
+          out/esp32/partitions.bin \
+          out/s3/firmware.bin \
+          out/s3/bootloader.bin \
+          out/s3/partitions.bin
+        do
+          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
+        done
 
     - name: Update generated-files cache on every commit
       uses: actions/cache@v4
@@ -264,7 +236,22 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-binaries
-        path: .
+        path: out
+    - name: Verify downloaded binaries
+      run: |
+        set -Eeuo pipefail
+        echo "Contents under ./out:"
+        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
+        for f in \
+          out/esp32/firmware.bin \
+          out/esp32/bootloader.bin \
+          out/esp32/partitions.bin \
+          out/s3/firmware.bin \
+          out/s3/bootloader.bin \
+          out/s3/partitions.bin
+        do
+          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
+        done
 
     - name: Update generated-files cache on every commit
       uses: actions/cache@v4
@@ -331,7 +318,23 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-binaries
-        path: .
+        path: out
+
+    - name: Verify downloaded binaries
+      run: |
+        set -Eeuo pipefail
+        echo "Contents under ./out:"
+        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
+        for f in \
+          out/esp32/firmware.bin \
+          out/esp32/bootloader.bin \
+          out/esp32/partitions.bin \
+          out/s3/firmware.bin \
+          out/s3/bootloader.bin \
+          out/s3/partitions.bin
+        do
+          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
+        done
 
     - name: Update generated-files cache on every commit
       uses: actions/cache@v4
@@ -404,7 +407,23 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-binaries
-        path: .
+        path: out
+    - name: Verify downloaded binaries
+      run: |
+        set -Eeuo pipefail
+        echo "Contents under ./out:"
+        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
+        for f in \
+          out/esp32/firmware.bin \
+          out/esp32/bootloader.bin \
+          out/esp32/partitions.bin \
+          out/s3/firmware.bin \
+          out/s3/bootloader.bin \
+          out/s3/partitions.bin
+        do
+          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
+        done
+
     - name: Prepare manual_setup_s3
       run: |
         rm -rf manual_setup_s3
