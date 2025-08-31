@@ -20,6 +20,23 @@
           "offset": 65536
         }
       ]
+    },
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "binary_s3/bootloader.bin",
+          "offset": 0
+        },
+        {
+          "path": "binary_s3/partitions.bin",
+          "offset": 32768
+        },
+        {
+          "path": "binary_s3/firmware.bin",
+          "offset": 65536
+        }
+      ]
     }
   ]
 }

@@ -52,6 +52,9 @@ jobs:
           ./code/.pio/build/esp32cam/firmware.bin
           ./code/.pio/build/esp32cam/partitions.bin
           ./code/.pio/build/esp32cam/bootloader.bin
+          ./code/.pio/build/esp32s3-aleksei/firmware.bin
+          ./code/.pio/build/esp32s3-aleksei/partitions.bin
+          ./code/.pio/build/esp32s3-aleksei/bootloader.bin
           ./html/*
           ./demo/*
         key: generated-files-${{ github.run_id }}
@@ -69,7 +72,7 @@ jobs:
 
     - name: Build Firmware
       #run: echo "Testing... ${{ github.ref_name }}, ${{ steps.vars.outputs.sha_short }}" > ./sd-card/html/version.txt; mkdir -p ./code/.pio/build/esp32cam/; cd ./code/.pio/build/esp32cam/; echo "${{ steps.vars.outputs.sha_short }}" > firmware.bin; cp firmware.bin partitions.bin; cp firmware.bin bootloader.bin # Testing
-      run: cd code; platformio run --environment esp32cam
+      run: cd code; platformio run --environment esp32cam --environment esp32s3-aleksei
 
     - name: Prepare Web UI (generate tooltip pages and update hashes in all files)
       run: |
@@ -127,6 +130,9 @@ jobs:
           ./code/.pio/build/esp32cam/firmware.bin
           ./code/.pio/build/esp32cam/partitions.bin
           ./code/.pio/build/esp32cam/bootloader.bin
+          ./code/.pio/build/esp32s3-aleksei/firmware.bin
+          ./code/.pio/build/esp32s3-aleksei/partitions.bin
+          ./code/.pio/build/esp32s3-aleksei/bootloader.bin
           ./html/*
           ./demo/*
         key: generated-files-${{ github.run_id }}
@@ -194,6 +200,9 @@ jobs:
           ./code/.pio/build/esp32cam/firmware.bin
           ./code/.pio/build/esp32cam/partitions.bin
           ./code/.pio/build/esp32cam/bootloader.bin
+          ./code/.pio/build/esp32s3-aleksei/firmware.bin
+          ./code/.pio/build/esp32s3-aleksei/partitions.bin
+          ./code/.pio/build/esp32s3-aleksei/bootloader.bin
           ./html/*
           ./demo/*
         key: generated-files-${{ github.run_id }}
@@ -254,6 +263,9 @@ jobs:
           ./code/.pio/build/esp32cam/firmware.bin
           ./code/.pio/build/esp32cam/partitions.bin
           ./code/.pio/build/esp32cam/bootloader.bin
+          ./code/.pio/build/esp32s3-aleksei/firmware.bin
+          ./code/.pio/build/esp32s3-aleksei/partitions.bin
+          ./code/.pio/build/esp32s3-aleksei/bootloader.bin
           ./html/*
           ./demo/*
         key: generated-files-${{ github.run_id }}
@@ -297,13 +309,38 @@ jobs:
         name: "AI-on-the-edge-device__manual-setup__${{ steps.vars.outputs.branch }}_(${{ steps.vars.outputs.sha_short }})"
         path: ./manual_setup
 
+  pack-for-manual_setup_s3:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ./code/.pio/build/esp32s3-aleksei/firmware.bin
+            ./code/.pio/build/esp32s3-aleksei/partitions.bin
+            ./code/.pio/build/esp32s3-aleksei/bootloader.bin
+        key: generated-files-${{ github.run_id }}
+        restore-keys: generated-files
+      - name: Prepare manual_setup_s3
+        run: |
+          rm -rf manual_setup_s3
+          mkdir -p manual_setup_s3
+          cp -f "./code/.pio/build/esp32s3-aleksei/firmware.bin"   "manual_setup_s3/firmware.bin"
+          cp -f "./code/.pio/build/esp32s3-aleksei/bootloader.bin" "manual_setup_s3/bootloader.bin"
+          cp -f "./code/.pio/build/esp32s3-aleksei/partitions.bin" "manual_setup_s3/partitions.bin"
+      - name: Upload manual_setup_s3
+        uses: actions/upload-artifact@v4
+        with:
+          name: "AI-on-the-edge-device__manual-setup-s3__${{ github.ref_name }}_(${{ github.sha }})"
+          path: ./manual_setup_s3
 
 #########################################################################################
 ## Prepare and create release
 #########################################################################################
   prepare-release: 
     runs-on: ubuntu-latest
-    needs: [pack-for-update, pack-for-manual_setup, pack-for-remote_setup]
+    needs: [pack-for-update, pack-for-manual_setup, pack-for-remote_setup, pack-for-manual_setup_s3]
     if: startsWith(github.ref, 'refs/tags/') 
 
     # Sets permissions of the GITHUB_TOKEN to allow updating the branches
@@ -358,6 +395,9 @@ jobs:
         # create AI-on-the-edge-device__remote-setup__*.zip like "AI-on-the-edge-device__remote-setup__v13.0.5.zip"
         cd ../remote_setup
         zip -r ../release/AI-on-the-edge-device__remote-setup__${{ steps.vars.outputs.branch }}.zip .
+
+        cd ../manual_setup_s3
+        zip -r ../release/AI-on-the-edge-device__manual-setup-s3__${{ steps.vars.outputs.branch }}.zip .
 
     # extract the version used in next step
     - id: get_version
@@ -432,6 +472,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
 
+    - name: Prepare webinstaller dirs
+      run: |
+        mkdir -p webinstaller/binary webinstaller/binary_s3
+        rm -f webinstaller/binary/* || true
+        rm -f webinstaller/binary_s3/* || true
+
     - name: Add binary to Web Installer and update manifest
       run: |
         echo "Updating Web installer to use firmware from ${{ steps.last_release.outputs.tag_name }}..."
@@ -442,6 +488,17 @@ jobs:
         echo "Updating index and manifest file..."
         sed -i 's/$VERSION/${{ steps.last_release.outputs.tag_name }}/g' webinstaller/index.html
         sed -i 's/$VERSION/${{ steps.last_release.outputs.tag_name }}/g' webinstaller/manifest.json
+
+    # --- ESP32-S3: from manual-setup-s3 zip (bootloader/partitions/firmware) ---
+    - name: Add ESP32-S3 binaries
+      run: |
+        set -euo pipefail
+        wget -q ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ steps.last_release.outputs.tag_name }}/AI-on-the-edge-device__manual-setup-s3__${{ steps.last_release.outputs.tag_name }}.zip
+        unzip -q -o AI-on-the-edge-device__manual-setup-s3__${{ steps.last_release.outputs.tag_name }}.zip -d _s3
+        cp -f _s3/bootloader.bin webinstaller/binary_s3/bootloader.bin
+        cp -f _s3/partitions.bin webinstaller/binary_s3/partitions.bin
+        cp -f _s3/firmware.bin   webinstaller/binary_s3/firmware.bin
+        rm -rf _s3
 
     - name: Setup Pages
       uses: actions/configure-pages@v4

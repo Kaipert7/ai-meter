@@ -39,6 +39,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Prepare webinstaller dirs
+      run: |
+        mkdir -p webinstaller/binary webinstaller/binary_s3
+        rm -f webinstaller/binary/* || true
+        rm -f webinstaller/binary_s3/* || true
+
     - name: Add binary to Web Installer and update manifest
       run: |
         echo "Updating Web installer to use firmware from ${{ steps.last_release.outputs.tag_name }}..."
@@ -50,6 +56,17 @@ jobs:
         sed -i 's/$VERSION/${{ steps.last_release.outputs.tag_name }}/g' webinstaller/index.html
         sed -i 's/$VERSION/${{ steps.last_release.outputs.tag_name }}/g' webinstaller/manifest.json
 
+    - name: Add ESP32-S3 binaries to Web Installer
+      run: |
+        set -euo pipefail
+        # --- ESP32-S3 (from 'manual-setup-s3' zip: contains bootloader/partitions/firmware) ---
+        wget -q ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ steps.last_release.outputs.tag_name }}/AI-on-the-edge-device__manual-setup-s3__${{ steps.last_release.outputs.tag_name }}.zip
+        unzip -q -o AI-on-the-edge-device__manual-setup-s3__${{ steps.last_release.outputs.tag_name }}.zip -d _s3
+        cp -f _s3/bootloader.bin webinstaller/binary_s3/bootloader.bin
+        cp -f _s3/partitions.bin webinstaller/binary_s3/partitions.bin
+        cp -f _s3/firmware.bin   webinstaller/binary_s3/firmware.bin
+        rm -rf _s3
+        
     - name: Setup Pages
       uses: actions/configure-pages@v5
 
