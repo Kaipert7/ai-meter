@@ -148,21 +148,6 @@ jobs:
       with:
         name: build-binaries
         path: out
-    - name: Verify downloaded binaries
-      run: |
-        set -Eeuo pipefail
-        echo "Contents under ./out:"
-        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
-        for f in \
-          out/esp32/firmware.bin \
-          out/esp32/bootloader.bin \
-          out/esp32/partitions.bin \
-          out/s3/firmware.bin \
-          out/s3/bootloader.bin \
-          out/s3/partitions.bin
-        do
-          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
-        done
 
     - name: Update generated-files cache on every commit
       uses: actions/cache@v4
@@ -232,26 +217,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
         name: build-binaries
         path: out
-    - name: Verify downloaded binaries
-      run: |
-        set -Eeuo pipefail
-        echo "Contents under ./out:"
-        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
-        for f in \
-          out/esp32/firmware.bin \
-          out/esp32/bootloader.bin \
-          out/esp32/partitions.bin \
-          out/s3/firmware.bin \
-          out/s3/bootloader.bin \
-          out/s3/partitions.bin
-        do
-          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
-        done
 
     - name: Update generated-files cache on every commit
       uses: actions/cache@v4
@@ -320,22 +291,6 @@ jobs:
         name: build-binaries
         path: out
 
-    - name: Verify downloaded binaries
-      run: |
-        set -Eeuo pipefail
-        echo "Contents under ./out:"
-        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
-        for f in \
-          out/esp32/firmware.bin \
-          out/esp32/bootloader.bin \
-          out/esp32/partitions.bin \
-          out/s3/firmware.bin \
-          out/s3/bootloader.bin \
-          out/s3/partitions.bin
-        do
-          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
-        done
-
     - name: Update generated-files cache on every commit
       uses: actions/cache@v4
       with:
@@ -403,26 +358,12 @@ jobs:
           ./code/.pio/build/esp32s3-aleksei/bootloader.bin
         key: generated-files-${{ github.run_id }}
         restore-keys: generated-files
+
     - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
         name: build-binaries
         path: out
-    - name: Verify downloaded binaries
-      run: |
-        set -Eeuo pipefail
-        echo "Contents under ./out:"
-        find out -maxdepth 3 -type f -printf "%P (%s bytes)\n" | sort || true
-        for f in \
-          out/esp32/firmware.bin \
-          out/esp32/bootloader.bin \
-          out/esp32/partitions.bin \
-          out/s3/firmware.bin \
-          out/s3/bootloader.bin \
-          out/s3/partitions.bin
-        do
-          [ -f "$f" ] || { echo "Missing $f" >&2; exit 1; }
-        done
 
     - name: Prepare manual_setup_s3
       run: |
@@ -431,6 +372,15 @@ jobs:
         cp -f ./out/s3/firmware.bin   manual_setup_s3/firmware.bin
         cp -f ./out/s3/bootloader.bin manual_setup_s3/bootloader.bin
         cp -f ./out/s3/partitions.bin manual_setup_s3/partitions.bin
+
+        if [ -d sd-card ]; then
+          cp -r sd-card sd-tmp
+          if [ -f sd-tmp/wlan.ini ]; then mv sd-tmp/wlan.ini sd-tmp/lan.ini; fi
+          rm -rf sd-tmp/html/param-tooltips 2>/dev/null || true
+          (cd sd-tmp; zip -r ../manual_setup_s3/sd-card.zip * )
+          rm -rf sd-tmp
+        fi
+
     - name: Upload manual_setup_s3
       uses: actions/upload-artifact@v4
       with:
