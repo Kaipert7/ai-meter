@@ -364,22 +364,27 @@ jobs:
       with:
         name: build-binaries
         path: out
-
+    
     - name: Prepare manual_setup_s3
       run: |
+        set -euo pipefail
         rm -rf manual_setup_s3
         mkdir -p manual_setup_s3
         cp -f ./out/s3/firmware.bin   manual_setup_s3/firmware.bin
         cp -f ./out/s3/bootloader.bin manual_setup_s3/bootloader.bin
         cp -f ./out/s3/partitions.bin manual_setup_s3/partitions.bin
-
-        if [ -d sd-card ]; then
-          cp -r sd-card sd-tmp
-          if [ -f sd-tmp/wlan.ini ]; then mv sd-tmp/wlan.ini sd-tmp/lan.ini; fi
-          rm -rf sd-tmp/html/param-tooltips 2>/dev/null || true
-          (cd sd-tmp; zip -r ../manual_setup_s3/sd-card.zip * )
-          rm -rf sd-tmp
-        fi
+    
+        # Build sd-card.zip from processed html/demo (same as ESP32), then rename INI
+        rm -rf sd-tmp
+        cp -r sd-card sd-tmp
+        rm -rf sd-tmp/html sd-tmp/demo
+        cp -r html sd-tmp/
+        cp -r demo sd-tmp/
+        rm -f sd-tmp/Readme.md
+        [ -f sd-tmp/wlan.ini ] && mv sd-tmp/wlan.ini sd-tmp/lan.ini
+        rm -rf sd-tmp/html/param-tooltips 2>/dev/null || true
+        (cd sd-tmp; zip -r ../manual_setup_s3/sd-card.zip * )
+        rm -rf sd-tmp
 
     - name: Upload manual_setup_s3
       uses: actions/upload-artifact@v4
