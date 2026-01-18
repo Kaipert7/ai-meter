@@ -92,10 +92,10 @@ bool sendHomeAssistantDiscoveryTopic(std::string group, std::string field, std::
 
     /* See https://www.home-assistant.io/docs/mqtt/discovery/ */
     std::string payload = string("{") + "\"~\": \"" + mqtt_controll_config.maintopic + "\"," +
-                          "\"unique_id\": \"" + mqtt_controll_config.maintopic + "-" + configTopic + "\"," +
+                          "\"name\": \"" + name + "\"," + "\"icon\": \"mdi:" + icon + "\"," +
                           "\"object_id\": \"" + mqtt_controll_config.maintopic + "_" + configTopic + "\"," +                           // Default entity ID; required for HA <= 2025.10
                           "\"default_entity_id\": \"" + component + "." + mqtt_controll_config.maintopic + "_" + configTopic + "\"," + // Default entity ID; required in HA >=2026.4
-                          "\"name\": \"" + name + "\"," + "\"icon\": \"mdi:" + icon + "\",";
+                          "\"unique_id\": \"" + mqtt_controll_config.maintopic + "-" + configTopic + "\",";
 
     if (group != "")
     {
@@ -224,7 +224,7 @@ bool MQTThomeassistantDiscovery(int qos)
         /* Not announcing "rate" as it is better to use rate_per_time_unit resp. rate_per_digitization_round */
         // allSendsSuccessed |= sendHomeAssistantDiscoveryTopic(group, "rate", "Rate (Unit/Minute)", "swap-vertical", "", "", "", "", qos); // Legacy, always Unit per Minute
         allSendsSuccessed |= sendHomeAssistantDiscoveryTopic(group, "rate_per_time_unit", "Rate (" + mqtt_controll_config.rateUnit + ")", "swap-vertical", mqtt_controll_config.rateUnit, rate_device_class, "measurement", "", qos);
-        allSendsSuccessed |= sendHomeAssistantDiscoveryTopic(group, "rate_per_digitization_round", "Change since last Digitization round", "arrow-expand-vertical", mqtt_controll_config.valueUnit, "", "measurement", "", qos); // correctly the Unit is Unit/Interval!
+        allSendsSuccessed |= sendHomeAssistantDiscoveryTopic(group, "rate_per_digitization_round", "Change since last Digitization round", "arrow-expand-vertical", mqtt_controll_config.valueUnit, rate_device_class, "measurement", "", qos); // correctly the Unit is Unit/Interval!
         allSendsSuccessed |= sendHomeAssistantDiscoveryTopic(group, "timestamp", "Timestamp", "clock-time-eight-outline", "", "timestamp", "", "diagnostic", qos);
         allSendsSuccessed |= sendHomeAssistantDiscoveryTopic(group, "json", "JSON", "code-json", "", "", "", "diagnostic", qos);
         allSendsSuccessed |= sendHomeAssistantDiscoveryTopic(group, "problem", "Problem", "alert-outline", "", "problem", "", "", qos); // Special binary sensor which is based on error topic

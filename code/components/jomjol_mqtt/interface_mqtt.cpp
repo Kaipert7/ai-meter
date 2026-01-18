@@ -31,6 +31,7 @@ int MQTTReconnectCnt = 0;
 
 void (*callbackOnConnected)(std::string, bool) = NULL;
 
+// e.g. _key = watermeter/main/rate_per_digitization_round, _content = change_absolute_temp, _qos = 1, retained_flag = mqtt_controll_config.retainFlag
 bool MQTTPublish(std::string _key, std::string _content, int qos, bool retained_flag)
 {
     if (!mqtt_controll_config.mqtt_enabled)

@@ -56,7 +56,7 @@ void ClassFlowMQTT::SetInitialParameter(void)
     mqtt_controll_config.validateServerCert = true;
     mqtt_controll_config.clientname = network_config.hostname;
 
-    mqtt_controll_config.OldValue = "";
+    mqtt_controll_config.oldValue = "";
 
     mqtt_controll_config.user = "";
     mqtt_controll_config.password = "";
@@ -362,10 +362,12 @@ bool ClassFlowMQTT::doFlow(std::string time)
 
             if (name_temp == "default")
             {
+                // e.g. watermeter/default/
                 name_temp = mqtt_controll_config.maintopic + "/";
             }
             else
             {
+                // e.g. watermeter/main/
                 name_temp = mqtt_controll_config.maintopic + "/" + name_temp + "/";
             }
 
@@ -404,6 +406,7 @@ bool ClassFlowMQTT::doFlow(std::string time)
 
             if (change_absolute_temp.length() > 0)
             {
+                // e.g. _key = watermeter/main/changeabsolut, _content = change_absolute_temp, _qos = 1, retained_flag = mqtt_controll_config.retainFlag
                 success |= MQTTPublish(name_temp + "changeabsolut", change_absolute_temp, qos, mqtt_controll_config.retainFlag); // Legacy API
                 success |= MQTTPublish(name_temp + "rate_per_digitization_round", change_absolute_temp, qos, mqtt_controll_config.retainFlag);
             }
@@ -423,7 +426,7 @@ bool ClassFlowMQTT::doFlow(std::string time)
         }
     }
 
-    mqtt_controll_config.OldValue = value_temp;
+    mqtt_controll_config.oldValue = value_temp;
 
     if (!success)
     {

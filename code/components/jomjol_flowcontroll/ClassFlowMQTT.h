@@ -28,7 +28,7 @@ typedef struct
     std::string topicTimeStamp;
     std::string topicUptime;
     std::string topicFreeMem;
-    std::string OldValue;
+    std::string oldValue;
 
     std::string user;
     std::string password;
