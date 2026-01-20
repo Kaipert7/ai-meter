@@ -55,7 +55,7 @@ std::vector<std::string> demoFiles;
 // Originally: config.xclk_freq_mhz = 20000000, but this lead to visual artifacts on many modules.
 // See https://github.com/espressif/esp32-camera/issues/150#issuecomment-726473652 et al.
 #if !defined(XCLK_FREQ_MHZ)
-int xclk = 20;
+int xclk = 16;
 #else
 int xclk = XCLK_FREQ_MHZ;
 #endif
