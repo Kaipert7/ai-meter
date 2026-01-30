@@ -21,8 +21,9 @@ idf_component_register(
     #
     # Öffentliche (propagierte) Abhängigkeiten:
     # - esp_wifi/esp_event/esp_netif/nvs_flash: Basis für WLAN/Netz
-    # - wpa_supplicant: liefert esp_wnm.h / esp_rrm.h / esp_mbo.h  <-- NEU
+    # - wpa_supplicant: liefert esp_wnm.h / esp_rrm.h / esp_mbo.h
     # - esp_http_client / esp_http_server: HTTP-Client/Server (basic_auth.h nutzt esp_http_server.h)
+    # - esp-tls: liefert esp_tls_crypto.h  <-- NEU
     # - driver: für driver/gpio.h
     # - jomjol_helper: liefert Helper.h (read_wlanini.cpp)
     #
@@ -34,6 +35,7 @@ idf_component_register(
         wpa_supplicant
         esp_http_client
         esp_http_server
+        esp-tls
         driver
         jomjol_helper
 )
