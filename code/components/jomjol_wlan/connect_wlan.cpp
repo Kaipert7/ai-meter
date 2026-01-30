@@ -53,9 +53,6 @@ extern "C" {
 #define ets_delay_us(a) esp_rom_delay_us(a)
 #endif
 
-#include "../esp-protocols/components/mdns/include/mdns.h" 
-
-
 static const char *TAG = "WIFI";
 
 static bool APWithBetterRSSI = false;
