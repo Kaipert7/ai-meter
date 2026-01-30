@@ -1,5 +1,9 @@
 #include "connect_wlan.h"
 
+extern "C" {
+  #include "mdns.h"
+}
+
 #include <string.h>
 #include <stdlib.h>
 #include <fstream>
