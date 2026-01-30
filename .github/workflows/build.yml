@@ -34,17 +34,17 @@ jobs:
     # 4) Board-Pins in das eigentliche Projekt unter /code/ einspielen
     - name: Add Board Config
       run: |
-        mkdir -p ${{ github.workspace }}/code/components/board_s3
-        cp ${{ github.workspace }}/boards/ai-meter-s3.h ${{ github.workspace }}/code/components/board_s3/board.h
+        mkdir -p "${{ github.workspace }}/code/components/board_s3"
+        cp "${{ github.workspace }}/boards/ai-meter-s3.h" "${{ github.workspace }}/code/components/board_s3/board.h"
         echo "Board config installed at /code/components/board_s3:"
-        ls -la ${{ github.workspace }}/code/components/board_s3
+        ls -la "${{ github.workspace }}/code/components/board_s3"
 
     # 5) Firmware im Unterordner /code/ bauen
     - name: Build Firmware (ESP32-S3)
       working-directory: ${{ github.workspace }}/code
       run: |
-        idf.py set-target esp32s3
-        idf.py build
+        idf.py -C "${{ github.workspace }}/code" set-target esp32s3
+        idf.py -C "${{ github.workspace }}/code" build
 
     # 6) Artefakte aus /code/build/ hochladen
     - name: Upload Firmware Artifacts
