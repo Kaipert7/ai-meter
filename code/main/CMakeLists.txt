@@ -12,7 +12,7 @@ idf_component_register(
         ${MAIN_SOURCES}
     INCLUDE_DIRS
         .
-    # WICHTIG: Benötigte IDF-Komponenten angeben, damit Header & Libs eingebunden werden
+    # WICHTIG: Benötigte IDF-/Projekt-Komponenten deklarieren
     REQUIRES
         esp_wifi
         esp_event
@@ -25,4 +25,6 @@ idf_component_register(
         mdns
         mqtt
         esp_psram
+        esp_eth         # <--- neu: wegen esp_eth.h
+        jomjol_helper   # <--- neu: liefert psram.h
 )
