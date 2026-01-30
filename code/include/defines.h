@@ -308,6 +308,50 @@
     #define FLASH_GPIO GPIO_NUM_4               // PIN for flashlight LED
     #define USE_PWM_LEDFLASH                    // if __LEDGLOBAL is defined, a global variable is used for LED control, otherwise locally and each time a new
 
+#elif defined(BOARD_S3_PROKYBER_AIE)  // ESP32-S3 Prokyber AI-on-the-Edge Cam V2.1.0
+  // ---- SD-Karte (SDMMC/SDIO) ----
+  // S3-Board: CLK=GPIO1, CMD=GPIO2, DAT0=GPIO42, DAT1=GPIO39, DAT2=GPIO38, DAT3=GPIO48
+  // Falls __SD_USE_ONE_LINE_MODE__ definiert ist: nur DAT0+D3 (CMD/CLK bleiben gleich)
+  #define GPIO_SDCARD_CLK  GPIO_NUM_1
+  #define GPIO_SDCARD_CMD  GPIO_NUM_2
+  #define GPIO_SDCARD_D0   GPIO_NUM_42
+  #ifndef __SD_USE_ONE_LINE_MODE__
+    #define GPIO_SDCARD_D1 GPIO_NUM_39
+    #define GPIO_SDCARD_D2 GPIO_NUM_38
+    #define GPIO_SDCARD_D3 GPIO_NUM_48
+  #else
+    #define GPIO_SDCARD_D1 GPIO_NUM_NC
+    #define GPIO_SDCARD_D2 GPIO_NUM_NC
+    #define GPIO_SDCARD_D3 GPIO_NUM_48
+  #endif
+
+  // ---- Kamera (OV2640, 24-Pin FPC) ----
+  // XCLK=14, PCLK=13, VSYNC=47, HREF=21, SIO(D)=41, SIO(C)=40
+  // Y0..Y7: 4,5,6,7,8,9,10,11  |  "Y9" = 12
+  #define CAM_PIN_PWDN   GPIO_NUM_NC
+  #define CAM_PIN_RESET  GPIO_NUM_NC
+  #define CAM_PIN_XCLK   GPIO_NUM_14
+  #define CAM_PIN_SIOD   GPIO_NUM_41
+  #define CAM_PIN_SIOC   GPIO_NUM_40
+  #define CAM_PIN_D7     GPIO_NUM_11
+  #define CAM_PIN_D6     GPIO_NUM_10
+  #define CAM_PIN_D5     GPIO_NUM_9
+  #define CAM_PIN_D4     GPIO_NUM_8
+  #define CAM_PIN_D3     GPIO_NUM_7
+  #define CAM_PIN_D2     GPIO_NUM_6
+  #define CAM_PIN_D1     GPIO_NUM_5
+  #define CAM_PIN_D0     GPIO_NUM_4
+  #define CAM_PIN_VSYNC  GPIO_NUM_47
+  #define CAM_PIN_HREF   GPIO_NUM_21
+  #define CAM_PIN_PCLK   GPIO_NUM_13
+
+  // ---- LEDs ----
+  // Weißlicht/Backlight am Board: GPIO12 (PWM möglich)
+  #define BLINK_GPIO     GPIO_NUM_NC      // kein dedizierter „Board-LED“-Pin vorhanden
+  #define FLASH_GPIO     GPIO_NUM_12
+  #define USE_PWM_LEDFLASH
+
+
 #else
     #error "Board not selected"
 #endif  //Board PIN Map
