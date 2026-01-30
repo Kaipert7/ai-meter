@@ -13,17 +13,17 @@ idf_component_register(
         .
     #
     # Interne (private) Abhängigkeiten dieses Components:
-    # -> mdns wird NUR hier im C++-Code genutzt (connect_wlan.cpp),
-    #    deshalb als PRIV_REQUIRES, damit die Header/Libs verfügbar sind.
+    # - mdns wird NUR in diesem Component genutzt (connect_wlan.cpp),
+    #   deshalb PRIV_REQUIRES.
     #
     PRIV_REQUIRES
         mdns
 
     #
     # Öffentliche (propagierte) Abhängigkeiten:
-    # -> WLAN/Netif/Event/NVS sind für die STA-Initialisierung notwendig.
-    # -> http_client wird im WLAN-Code häufig für Tests/Aufrufe genutzt;
-    #    falls in deinem connect_wlan.cpp NICHT verwendet, kannst du es entfernen.
+    # - esp_http_server -> NEU: wegen basic_auth.h -> esp_http_server.h
+    # - esp_wifi/esp_event/esp_netif/nvs_flash: Basis für WLAN-Init
+    # - esp_http_client nur falls im WLAN-Code genutzt (bei dir ja).
     #
     REQUIRES
         esp_wifi
@@ -31,4 +31,5 @@ idf_component_register(
         esp_netif
         nvs_flash
         esp_http_client
+        esp_http_server    # <--- NEU
 )
