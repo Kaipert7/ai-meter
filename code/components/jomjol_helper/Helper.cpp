@@ -33,6 +33,10 @@ extern "C"
 #include "esp_vfs_fat.h"
 #include "../sdmmc_common.h"
 
+#if CONFIG_IDF_TARGET_ESP32S3
+extern "C" int temprature_sens_read(void) { return 0; }
+#endif
+
 static const char *TAG = "HELPER";
 
 using namespace std;
