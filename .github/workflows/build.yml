@@ -27,11 +27,11 @@ jobs:
         ls -la "${{ github.workspace }}/boards" || true
 
     # 2) ESP-IDF Action: Umgebung + Build in EINEM Schritt (läuft im Container)
-    #    Durch 'path: code' befindet sich das Arbeitsverzeichnis innerhalb der Action in ./code
+    #    -> IDF bewusst auf 5.x pinnen, damit 'mqtt' als IDF-Komponente vorhanden ist
     - name: Build with ESP-IDF action (inside container)
       uses: espressif/esp-idf-ci-action@v1
       with:
-        esp_idf_version: latest
+        esp_idf_version: v5.1.4     # <--- wichtig: 5.x statt latest/6.x
         target: esp32s3
         path: code
         command: |
@@ -42,6 +42,8 @@ jobs:
           # Die Board-Datei liegt eine Ebene höher (Repo-Root -> ../boards/...)
           cp ../boards/ai-meter-s3.h components/board_s3/board.h
           ls -la components/board_s3
+          echo "ESP-IDF version:"
+          idf.py --version || true
           echo "Start build..."
           idf.py set-target esp32s3
           idf.py build
