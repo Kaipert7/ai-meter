@@ -57,5 +57,5 @@ jobs:
         path: |
           code/build/bootloader/bootloader.bin
           code/build/partition_table/partition-table.bin
-          code/build/ai-on-the-edge-device.bin
           code/build/boot_app0.bin
+          code/build/*.bin
