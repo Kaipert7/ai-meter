@@ -20,16 +20,20 @@ jobs:
     - name: Show workspace & verify structure
       run: |
         echo "GITHUB_WORKSPACE=${{ github.workspace }}"
-        ls -la ${{ github.workspace }}
+        ls -la "${{ github.workspace }}"
         echo "---- /code ----"
-        ls -la ${{ github.workspace }}/code || true
+        ls -la "${{ github.workspace }}/code" || true
 
-    # 3) ESP-IDF für ESP32-S3 bereitstellen
-    - name: Install ESP-IDF
+    # 3) ESP-IDF Umgebung bereitstellen – NICHT bauen!
+    #    -> 'path: code' setzt das Projektverzeichnis,
+    #    -> 'command' überschreiben, damit die Action NICHT automatisch 'idf.py build' im Repo-Root startet.
+    - name: Prepare ESP-IDF (no auto build)
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: latest
         target: esp32s3
+        path: code
+        command: echo "ESP-IDF environment ready"
 
     # 4) Board-Pins in das eigentliche Projekt unter /code/ einspielen
     - name: Add Board Config
@@ -39,12 +43,12 @@ jobs:
         echo "Board config installed at /code/components/board_s3:"
         ls -la "${{ github.workspace }}/code/components/board_s3"
 
-    # 5) Firmware im Unterordner /code/ bauen
+    # 5) Firmware im Unterordner /code/ bauen (jetzt erst!)
     - name: Build Firmware (ESP32-S3)
       working-directory: ${{ github.workspace }}/code
       run: |
-        idf.py -C "${{ github.workspace }}/code" set-target esp32s3
-        idf.py -C "${{ github.workspace }}/code" build
+        idf.py set-target esp32s3
+        idf.py build
 
     # 6) Artefakte aus /code/build/ hochladen
     - name: Upload Firmware Artifacts
