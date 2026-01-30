@@ -9,14 +9,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1) Repo + Submodule holen (wichtig!)
+    # 1) Repo + Submodule holen
     - name: Checkout repository (with submodules)
       uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
 
-    # 2) Nur zur Kontrolle: Struktur anzeigen
+    # (optional) Sichtprüfung der Struktur
     - name: Show workspace & verify structure
       run: |
         echo "GITHUB_WORKSPACE=${{ github.workspace }}"
@@ -24,33 +24,27 @@ jobs:
         echo "---- /code ----"
         ls -la "${{ github.workspace }}/code" || true
 
-    # 3) ESP-IDF Umgebung bereitstellen – NICHT bauen!
-    #    -> 'path: code' setzt das Projektverzeichnis,
-    #    -> 'command' überschreiben, damit die Action NICHT automatisch 'idf.py build' im Repo-Root startet.
-    - name: Prepare ESP-IDF (no auto build)
+    # 2) ESP-IDF Action: Umgebung + Build in EINEM Schritt
+    #    -> Wir kopieren Board-Pins und bauen in code/
+    - name: Build with ESP-IDF action (inside container)
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: latest
         target: esp32s3
+        # 'path' ist optional; wir nutzen -C in den Befehlen unten trotzdem:
         path: code
-        command: echo "ESP-IDF environment ready"
+        command: |
+          set -e
+          echo "Prepare board config..."
+          mkdir -p code/components/board_s3
+          cp boards/ai-meter-s3.h code/components/board_s3/board.h
+          ls -la code/components/board_s3
+          echo "Start build..."
+          idf.py -C code set-target esp32s3
+          idf.py -C code build
+          echo "Build finished."
 
-    # 4) Board-Pins in das eigentliche Projekt unter /code/ einspielen
-    - name: Add Board Config
-      run: |
-        mkdir -p "${{ github.workspace }}/code/components/board_s3"
-        cp "${{ github.workspace }}/boards/ai-meter-s3.h" "${{ github.workspace }}/code/components/board_s3/board.h"
-        echo "Board config installed at /code/components/board_s3:"
-        ls -la "${{ github.workspace }}/code/components/board_s3"
-
-    # 5) Firmware im Unterordner /code/ bauen (jetzt erst!)
-    - name: Build Firmware (ESP32-S3)
-      working-directory: ${{ github.workspace }}/code
-      run: |
-        idf.py set-target esp32s3
-        idf.py build
-
-    # 6) Artefakte aus /code/build/ hochladen
+    # 3) Artefakte hochladen (aus code/build/)
     - name: Upload Firmware Artifacts
       uses: actions/upload-artifact@v4
       with:
