@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1) Repo + Submodule holen
+    # 1) Repo + Submodule holen (wichtig für Komponenten aus .gitmodules)
     - name: Checkout repository (with submodules)
       uses: actions/checkout@v4
       with:
@@ -23,25 +23,28 @@ jobs:
         ls -la "${{ github.workspace }}"
         echo "---- /code ----"
         ls -la "${{ github.workspace }}/code" || true
+        echo "---- /boards ----"
+        ls -la "${{ github.workspace }}/boards" || true
 
-    # 2) ESP-IDF Action: Umgebung + Build in EINEM Schritt
-    #    -> Wir kopieren Board-Pins und bauen in code/
+    # 2) ESP-IDF Action: Umgebung + Build in EINEM Schritt (läuft im Container)
+    #    Durch 'path: code' befindet sich das Arbeitsverzeichnis innerhalb der Action in ./code
     - name: Build with ESP-IDF action (inside container)
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: latest
         target: esp32s3
-        # 'path' ist optional; wir nutzen -C in den Befehlen unten trotzdem:
         path: code
         command: |
           set -e
+          echo "PWD=$(pwd)"
           echo "Prepare board config..."
-          mkdir -p code/components/board_s3
-          cp boards/ai-meter-s3.h code/components/board_s3/board.h
-          ls -la code/components/board_s3
+          mkdir -p components/board_s3
+          # Die Board-Datei liegt eine Ebene höher (Repo-Root -> ../boards/...)
+          cp ../boards/ai-meter-s3.h components/board_s3/board.h
+          ls -la components/board_s3
           echo "Start build..."
-          idf.py -C code set-target esp32s3
-          idf.py -C code build
+          idf.py set-target esp32s3
+          idf.py build
           echo "Build finished."
 
     # 3) Artefakte hochladen (aus code/build/)
