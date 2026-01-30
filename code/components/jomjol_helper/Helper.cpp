@@ -34,7 +34,7 @@ extern "C"
 #include "../sdmmc_common.h"
 
 #if CONFIG_IDF_TARGET_ESP32S3
-extern "C" int temprature_sens_read(void) { return 0; }
+extern "C" uint8_t temprature_sens_read(void) { return 0; }
 #endif
 
 static const char *TAG = "HELPER";
