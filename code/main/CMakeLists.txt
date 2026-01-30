@@ -13,8 +13,7 @@ idf_component_register(
     INCLUDE_DIRS
         .
     #
-    # WICHTIG: Alle benötigten Komponenten hier benennen.
-    # -> IDF bindet Header/Libs nur für deklarierte Komponenten ein.
+    # NUR die Komponenten, deren Header in main/* direkt inkludiert werden:
     #
     REQUIRES
         # --- ESP-IDF Basis für Netzwerk/HTTP/MQTT/PSRAM/Ethernet ---
@@ -31,26 +30,11 @@ idf_component_register(
         esp_psram
         esp_eth
 
-        # --- Projekt-/Jomjol-Komponenten (aus code/components/) ---
+        # --- Projekt-/Jomjol-Komponenten (laut code/components/) ---
         jomjol_helper
         jomjol_configfile
         jomjol_time_sntp
         jomjol_logfile
-        jomjol_mqtt
-        jomjol_controlGPIO     # liefert i. d. R. server_GPIO.h
-        jomjol_wlan            # liefert connect_wlan.h (bei Bedarf Groß-/Kleinschreibung anpassen!)
-        jomjol_controlcamera
-        jomjol_flowcontroll
-        jomjol_image_prc
-        jomjol_webhook
-        jomjol_fileserver_ota
-
-        # Falls du tflite-Klassen direkt aus main nutzt:
-        jomjol_tfliteclass
-
-        # Externe AI/Camera-Komponenten (liegen ebenfalls unter code/components/)
-        esp32-camera
-        esp-tflite-micro
-        esp-nn
-        esp-protocols           # enthält u. a. mdns Sub-Komponente
+        jomjol_controlGPIO    # liefert server_GPIO.h
+        jomjol_wlan           # liefert connect_wlan.h
 )
