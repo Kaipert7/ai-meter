@@ -18,5 +18,6 @@ if(EXISTS "${SDKCONFIG}.defaults")
     message(STATUS "-- Using defaults: ${SDKCONFIG_DEFAULTS}")
 endif()
 
+add_compile_definitions(BOARD_S3_PROKYBER_AIE=1)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(AI-on-the-edge)
