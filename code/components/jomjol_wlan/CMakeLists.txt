@@ -13,16 +13,17 @@ idf_component_register(
         .
     #
     # Interne (private) Abhängigkeiten dieses Components:
-    # mdns wird nur hier im C++-Code (connect_wlan.cpp) genutzt.
+    # mdns wird nur hier (C++) genutzt.
     #
     PRIV_REQUIRES
         mdns
 
     #
     # Öffentliche (propagierte) Abhängigkeiten:
-    # - esp_wifi/esp_event/esp_netif/nvs_flash: WLAN/Netz-Init
-    # - esp_http_client/esp_http_server: HTTP-Client & -Server (basic_auth.h nutzt esp_http_server.h)
-    # - driver: für driver/gpio.h in connect_wlan.cpp
+    # - esp_wifi/esp_event/esp_netif/nvs_flash: Basis für WLAN/Netz
+    # - wpa_supplicant: liefert esp_wnm.h / esp_rrm.h / esp_mbo.h  <-- NEU
+    # - esp_http_client / esp_http_server: HTTP-Client/Server (basic_auth.h nutzt esp_http_server.h)
+    # - driver: für driver/gpio.h
     # - jomjol_helper: liefert Helper.h (read_wlanini.cpp)
     #
     REQUIRES
@@ -30,6 +31,7 @@ idf_component_register(
         esp_event
         esp_netif
         nvs_flash
+        wpa_supplicant
         esp_http_client
         esp_http_server
         driver
