@@ -9,39 +9,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    # 1) Repo + Submodule holen (wichtig!)
+    - name: Checkout repository (with submodules)
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
 
+    # 2) Nur zur Kontrolle: Struktur anzeigen
     - name: Show workspace & verify structure
       run: |
         echo "GITHUB_WORKSPACE=${{ github.workspace }}"
         ls -la ${{ github.workspace }}
+        echo "---- /code ----"
+        ls -la ${{ github.workspace }}/code || true
 
+    # 3) ESP-IDF für ESP32-S3 bereitstellen
     - name: Install ESP-IDF
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: latest
         target: esp32s3
 
+    # 4) Board-Pins in das eigentliche Projekt unter /code/ einspielen
     - name: Add Board Config
       run: |
-        mkdir -p ${{ github.workspace }}/components/board_s3
-        cp ${{ github.workspace }}/boards/ai-meter-s3.h ${{ github.workspace }}/components/board_s3/board.h
-        echo "Board config installed:"
-        ls -la ${{ github.workspace }}/components/board_s3
+        mkdir -p ${{ github.workspace }}/code/components/board_s3
+        cp ${{ github.workspace }}/boards/ai-meter-s3.h ${{ github.workspace }}/code/components/board_s3/board.h
+        echo "Board config installed at /code/components/board_s3:"
+        ls -la ${{ github.workspace }}/code/components/board_s3
 
+    # 5) Firmware im Unterordner /code/ bauen
     - name: Build Firmware (ESP32-S3)
-      working-directory: ${{ github.workspace }}
+      working-directory: ${{ github.workspace }}/code
       run: |
         idf.py set-target esp32s3
         idf.py build
 
+    # 6) Artefakte aus /code/build/ hochladen
     - name: Upload Firmware Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ai-meter-firmware
         path: |
-          build/bootloader/bootloader.bin
-          build/partition_table/partition-table.bin
-          build/ai-on-the-edge-device.bin
-          build/boot_app0.bin
+          code/build/bootloader/bootloader.bin
+          code/build/partition_table/partition-table.bin
+          code/build/ai-on-the-edge-device.bin
+          code/build/boot_app0.bin
