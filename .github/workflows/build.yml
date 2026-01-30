@@ -1,0 +1,47 @@
+name: Build AI-on-the-Edge S3 Firmware
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Show workspace & verify structure
+      run: |
+        echo "GITHUB_WORKSPACE=${{ github.workspace }}"
+        ls -la ${{ github.workspace }}
+
+    - name: Install ESP-IDF
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: latest
+        target: esp32s3
+
+    - name: Add Board Config
+      run: |
+        mkdir -p ${{ github.workspace }}/components/board_s3
+        cp ${{ github.workspace }}/boards/ai-meter-s3.h ${{ github.workspace }}/components/board_s3/board.h
+        echo "Board config installed:"
+        ls -la ${{ github.workspace }}/components/board_s3
+
+    - name: Build Firmware (ESP32-S3)
+      working-directory: ${{ github.workspace }}
+      run: |
+        idf.py set-target esp32s3
+        idf.py build
+
+    - name: Upload Firmware Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ai-meter-firmware
+        path: |
+          build/bootloader/bootloader.bin
+          build/partition_table/partition-table.bin
+          build/ai-on-the-edge-device.bin
+          build/boot_app0.bin
