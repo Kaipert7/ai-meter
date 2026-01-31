@@ -1,4 +1,5 @@
 #include "ClassLogFile.h"
+ClassLogFile LogFile;         // <— genau 1x Definition im Projekt
 #include "time_sntp.h"
 #include "esp_log.h"
 #include <string.h>
