@@ -111,7 +111,7 @@ int getUTCOffsetSeconds(std::string &zeitzone)
         stunden = stoi(zeitzone.substr(1, 2));
         minuten = stoi(zeitzone.substr(3, 2));
 
-        offset = ((stunden * 60) + minuten) * 60;
+        offset = vorzeichen * ((stunden * 60) + minuten) * 60;
     }
     return offset;
 }
