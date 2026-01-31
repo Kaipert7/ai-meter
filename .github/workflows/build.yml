@@ -16,7 +16,7 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
-    # (optional) Sichtprüfung der Struktur
+    # (optional) Struktur anzeigen – hilfreich für Debugging
     - name: Show workspace & verify structure
       run: |
         echo "GITHUB_WORKSPACE=${{ github.workspace }}"
@@ -26,25 +26,45 @@ jobs:
         echo "---- /boards ----"
         ls -la "${{ github.workspace }}/boards" || true
 
-    # 2) ESP-IDF Action: Umgebung + Build in EINEM Schritt (läuft im Container)
-    #    -> IDF bewusst auf 5.x pinnen, damit 'mqtt' als IDF-Komponente vorhanden ist
-    - name: Build with ESP-IDF action (inside container)
+    # 2) ESP-IDF Action: Umgebung + Build im Container
+    - name: Build with ESP-IDF action (inside container, full clean)
       uses: espressif/esp-idf-ci-action@v1
       with:
-        esp_idf_version: v5.1.4     # <--- wichtig: 5.x statt latest/6.x
+        esp_idf_version: v5.1.4       # bewusst auf IDF 5.1.4 gepinnt
         target: esp32s3
-        path: code
+        path: code                    # Arbeitsverzeichnis im Container
         command: |
           set -e
+
           echo "PWD=$(pwd)"
           echo "Prepare board config..."
           mkdir -p components/board_s3
           # Die Board-Datei liegt eine Ebene höher (Repo-Root -> ../boards/...)
           cp ../boards/ai-meter-s3.h components/board_s3/board.h
           ls -la components/board_s3
+
           echo "ESP-IDF version:"
           idf.py --version || true
-          echo "Start build..."
+          python --version || true
+
+          echo "===== HARD CLEAN / CACHE BUST ====="
+          # 1) ggf. vorhandene Build-Ordner & Caches hart entfernen
+          rm -rf build
+          rm -rf .cache
+          rm -rf .cmake
+          rm -rf CMakeFiles CMakeCache.txt
+          # ccache (falls im Container aktiv)
+          if command -v ccache >/dev/null 2>&1; then
+            ccache -C || true
+            ccache -z || true
+          fi
+
+          echo "===== IDF FULLCLEAN + RECONFIGURE ====="
+          # 2) IDF-Seite sauber resetten
+          idf.py fullclean
+          idf.py reconfigure
+
+          echo "===== SET TARGET & BUILD ====="
           idf.py set-target esp32s3
           idf.py build
           echo "Build finished."
@@ -59,3 +79,5 @@ jobs:
           code/build/partition_table/partition-table.bin
           code/build/boot_app0.bin
           code/build/*.bin
+          code/build/*.elf
+          code/build/flasher_args.json
