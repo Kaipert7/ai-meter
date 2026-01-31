@@ -1,7 +1,7 @@
 #include "ClassLogFile.h"
 #include "time_sntp.h"
 #include "esp_log.h"
-#include <stio.h>    // fopen, fputs, fclose, fileno
+#include <stdio.h>    // fopen, fputs, fclose, fileno
 #include <unistd.h>   // fsync
 #include <string.h>     
 #include <sys/types.h>
@@ -399,7 +399,6 @@ void ClassLogFile::RemoveOldDataLog()
                 notDeleted ++;
             }
         }
-    }
     ESP_LOGD(TAG, "data files deleted: %d | files not deleted (incl. leer.txt): %d", deleted, notDeleted);	
     closedir(dir);
 }
