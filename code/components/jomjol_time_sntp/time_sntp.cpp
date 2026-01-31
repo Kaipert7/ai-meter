@@ -10,7 +10,7 @@
 #include "esp_log.h"
 #include "esp_attr.h"
 #include "esp_sleep.h"
-#include "esp_netif_sntp.h"
+#include "esp_sntp.h"
 
 #include "../../include/defines.h"
 
@@ -183,12 +183,12 @@ bool getTimeWasNotSetAtBoot(void)
 std::string getServerName(void) {
     char buf[100];
 
-    if (sntp_getservername(0)){
-        snprintf(buf, sizeof(buf), "%s", sntp_getservername(0));
+    if (esp_sntp_getservername(0)){
+        snprintf(buf, sizeof(buf), "%s", esp_sntp_getservername(0));
         return std::string(buf);
     }
     else { // we have either IPv4 or IPv6 address
-        ip_addr_t const *ip = sntp_getserver(0);
+        ip_addr_t const *ip = esp_sntp_getserver(0);
         if (ipaddr_ntoa_r(ip, buf, sizeof(buf)) != NULL) {
             return std::string(buf);
         }
