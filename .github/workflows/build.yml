@@ -16,7 +16,7 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
-    # (optional) Struktur anzeigen – hilfreich für Debugging
+    # (optional) Sichtprüfung der Struktur
     - name: Show workspace & verify structure
       run: |
         echo "GITHUB_WORKSPACE=${{ github.workspace }}"
@@ -26,13 +26,14 @@ jobs:
         echo "---- /boards ----"
         ls -la "${{ github.workspace }}/boards" || true
 
-    # 2) ESP-IDF Action: Umgebung + Build im Container
-    - name: Build with ESP-IDF action (inside container, full clean)
+    # 2) ESP-IDF Action: Umgebung + Build in EINEM Schritt (läuft im Container)
+    #    -> IDF bewusst auf 5.x pinnen, damit 'mqtt' als IDF-Komponente vorhanden ist
+    - name: Build with ESP-IDF action (inside container, full clean + log capture)
       uses: espressif/esp-idf-ci-action@v1
       with:
-        esp_idf_version: v5.1.4       # bewusst auf IDF 5.1.4 gepinnt
+        esp_idf_version: v5.1.4     # <--- wichtig: 5.x statt latest/6.x
         target: esp32s3
-        path: code                    # Arbeitsverzeichnis im Container
+        path: code
         command: |
           set -e
 
@@ -49,28 +50,84 @@ jobs:
 
           echo "===== HARD CLEAN / CACHE BUST ====="
           # 1) ggf. vorhandene Build-Ordner & Caches hart entfernen
-          rm -rf build
-          rm -rf .cache
-          rm -rf .cmake
-          rm -rf CMakeFiles CMakeCache.txt
-          # ccache (falls im Container aktiv)
+          rm -rf build .cache .cmake CMakeFiles CMakeCache.txt
           if command -v ccache >/dev/null 2>&1; then
             ccache -C || true
             ccache -z || true
           fi
 
           echo "===== IDF FULLCLEAN + RECONFIGURE ====="
-          # 2) IDF-Seite sauber resetten
           idf.py fullclean
           idf.py reconfigure
-
-          echo "===== SET TARGET & BUILD ====="
           idf.py set-target esp32s3
-          idf.py build
-          echo "Build finished."
+
+          echo "===== CAPTURE LOGS ====="
+          mkdir -p build/log
+          LOG_TS="$(date +%Y%m%d_%H%M%S)"
+          LOG_FILE="build/log/idf_build_${LOG_TS}.log"
+          # Build + Log-Capture (Exitcode von idf.py build korrekt übernehmen)
+          ( idf.py build 2>&1 | tee "${LOG_FILE}" ) ; BUILD_RC=${PIPESTATUS[0]}
+          # Symlink auf "latest" für schnellen Zugriff
+          rm -f build/log/latest.log || true
+          ln -s "$(basename "${LOG_FILE}")" build/log/latest.log || true
+          # Exitcode an den Runner zurückgeben (Analyse erfolgt im nächsten Step trotzdem "always()")
+          exit ${BUILD_RC}
+
+    # 2.5) Automatische Log-Analyse + Zusammenfassung im Job-Summary
+    - name: Analyze build log & write summary
+      if: always()  # auch bei Build-Fehlern ausführen
+      working-directory: code
+      run: |
+        set -e
+        LOG_DIR="build/log"
+        LATEST="${LOG_DIR}/latest.log"
+        # Fallback: Neuester Log via ls, falls Symlink nicht existiert
+        if [ ! -f "${LATEST}" ]; then
+          LATEST="$(ls -1t ${LOG_DIR}/idf_build_*.log 2>/dev/null | head -n1 || true)"
+        fi
+
+        echo "### Build Log Analyse" >> "$GITHUB_STEP_SUMMARY"
+        if [ -z "${LATEST}" ] || [ ! -f "${LATEST}" ]; then
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "> Kein Log gefunden (Ordner: ${LOG_DIR})." >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
+
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Logdatei: \`${LATEST}\`" >> "$GITHUB_STEP_SUMMARY"
+
+        # Grobe Kennzahlen
+        # Hinweis: Wir werten stderr/stdout gemischt aus (siehe tee). Filter sind bewusst defensiv gehalten.
+        TOTAL_ERRORS=$(grep -iE "(^|\s)error:|^FAILED:|ninja: build stopped|Stack trace|backtrace" "${LATEST}" | wc -l || true)
+        TOTAL_WARNINGS=$(grep -iE "warning:" "${LATEST}" | wc -l || true)
+
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "#### Kennzahlen" >> "$GITHUB_STEP_SUMMARY"
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Errors (heuristisch): **${TOTAL_ERRORS}**" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Warnings: **${TOTAL_WARNINGS}**" >> "$GITHUB_STEP_SUMMARY"
+
+        # Top-5 Warning-Quellen (Dateinamen extrahieren)
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "#### Top-5 Warning-Quellen" >> "$GITHUB_STEP_SUMMARY"
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        grep -i "warning:" "${LATEST}" \
+          | sed -E 's#^(.*/)?([^/: ]+\.(c|cpp|cc|hpp|h))[: ].*$#\2#' \
+          | sort | uniq -c | sort -nr | head -n 5 \
+          | awk '{printf "- %s ×%s\n", $2, $1}' >> "$GITHUB_STEP_SUMMARY" || echo "- (keine Warnungen gefunden)" >> "$GITHUB_STEP_SUMMARY"
+
+        # Letzte 50 kritische Zeilen (Errors/FAILED/ninja stopped)
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "#### Letzte Fehlermeldungen (Ausschnitt)" >> "$GITHUB_STEP_SUMMARY"
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        grep -iE "(^|\s)error:|^FAILED:|ninja: build stopped|Stack trace|backtrace" "${LATEST}" | tail -n 50 \
+          | sed -E 's/[<>]/_/g' \
+          | sed -E 's#\x1B\[[0-9;]*[A-Za-z]##g' \
+          | awk '{print "```\n" $0 "\n```"}' >> "$GITHUB_STEP_SUMMARY" || echo "_Keine Errors gefunden._" >> "$GITHUB_STEP_SUMMARY"
 
     # 3) Artefakte hochladen (aus code/build/)
     - name: Upload Firmware Artifacts
+      if: always()  # auch bei Fehlern -> ggf. teilweise Artefakte/Logs vorhanden
       uses: actions/upload-artifact@v4
       with:
         name: ai-meter-firmware
@@ -81,3 +138,5 @@ jobs:
           code/build/*.bin
           code/build/*.elf
           code/build/flasher_args.json
+          code/build/log/*.log
+        if-no-files-found: ignore
