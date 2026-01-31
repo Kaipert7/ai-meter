@@ -1,10 +1,14 @@
 #include "ClassLogFile.h"
 #include "time_sntp.h"
-#include "esp_log.h"    // fopen, fputs, fclose, fileno
-#include <string.h>     // fsync
+#include "esp_log.h"
+#include <stfio.h>    // fopen, fputs, fclose, fileno
+#include <unistd.h>   // fsync
+#include <string.h>     
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <algorithm>
+#include <errno.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,6 +59,7 @@ void ClassLogFile::WriteToData(std::string _timestamp, std::string _name, std::s
     pFile = fopen(logpath.c_str(), "a+");
 
     if (pFile!=NULL) {
+        ESP_LOGD(TAG, "Opened data file successfully: %s", logpath.c_str());  
         fputs(_timestamp.c_str(), pFile);
         fputs(",", pFile);
         fputs(_name.c_str(), pFile);
@@ -74,12 +79,11 @@ void ClassLogFile::WriteToData(std::string _timestamp, std::string _name, std::s
         fputs(_digit.c_str(), pFile);
         fputs(",", pFile);
         fputs(_analog.c_str(), pFile);
-        fputs(",", pFile);
         fputs("\n", pFile);
-
+        ESP_LOGD(TAG, "Wrote CSV line to %s", logpath.c_str());
         fclose(pFile);    
     } else {
-        ESP_LOGE(TAG, "Can't open data file %s", logpath.c_str());
+        ESP_LOGE(TAG, "Can't open data file %s (errno=%d)", logpath.c_str(), errno);
     }
 
 }
