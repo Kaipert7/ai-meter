@@ -21,3 +21,15 @@ endif()
 add_compile_definitions(BOARD_S3_PROKYBER_AIE=1)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(AI-on-the-edge)
+
+# esp-tflite-micro gezielt von -Wshadow befreien
+if (TARGET __idf_esp-tflite-micro)
+  message(STATUS "Apply -Wno-shadow to target: __idf_esp-tflite-micro")
+  target_compile_options(__idf_esp-tflite-micro PRIVATE -Wno-shadow)
+
+  # Optional (zusätzlich): die TFLM-Headerpfade als SYSTEM, damit Header-Warnungen stumm sind
+  target_include_directories(__idf_esp-tflite-micro SYSTEM PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/components/esp-tflite-micro/tensorflow
+    ${CMAKE_CURRENT_LIST_DIR}/components/esp-tflite-micro/third_party
+  )
+endif()
