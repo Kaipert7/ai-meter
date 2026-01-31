@@ -348,7 +348,7 @@ void ClassLogFile::RemoveOldLogFile()
                 notDeleted++;
             }
         }
-    }
+    
     ESP_LOGD(TAG, "log files deleted: %d \n files not deleted (incl. leer.txt): %d", deleted, notDeleted);	
     closedir(dir);
 }
@@ -356,8 +356,10 @@ void ClassLogFile::RemoveOldLogFile()
 
 void ClassLogFile::RemoveOldDataLog()
 {
-    if (dataLogRetentionInDays == 0 || !doDataLogToSD) {
-        return;
+    
+	if (dataLogRetentionInDays == 0 || !doDataLogToSD) {
+		return;
+
     }
 
     ESP_LOGD(TAG, "Remove old data files");
@@ -402,7 +404,7 @@ void ClassLogFile::RemoveOldDataLog()
     ESP_LOGD(TAG, "data files deleted: %d \n files not deleted (incl. leer.txt): %d", deleted, notDeleted);
     closedir(dir);
  }
-}
+
 
 bool ClassLogFile::CreateLogDirectories()
 {
