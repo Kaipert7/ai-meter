@@ -3,10 +3,8 @@
 #ifndef CLASSLOGFILE_H
 #define CLASSLOGFILE_H
 
-
 #include <string>
 #include "esp_log.h"
-
 
 class ClassLogFile
 {
