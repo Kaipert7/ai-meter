@@ -121,7 +121,7 @@ void StatusLED(StatusLedSource _eSource, int _iCode, bool _bInfinite)
 
 	if (xHandle_task_StatusLED && !StatusLEDData.bProcessingRequest) {
 		StatusLEDData.bProcessingRequest = true;
-		BaseType_t xReturned = xTaskAbortDelay(xHandle_task_StatusLED);	// Reuse still running status LED task
+		( void ) xTaskAbortDelay(xHandle_task_StatusLED);	// Reuse still running status LED task
 		/*if (xReturned == pdPASS)
 			ESP_LOGD(TAG, "task_StatusLED - abort waiting delay");*/
 	}
@@ -150,4 +150,5 @@ void StatusLEDOff(void)
 	gpio_pad_select_gpio(BLINK_GPIO); // Init the GPIO
 	gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT); // Set the GPIO as a push/pull output
 	gpio_set_level(BLINK_GPIO, 1);// LED off
+
 }
