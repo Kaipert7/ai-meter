@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <algorithm>
-#include <errno.h>
+#include <errno.h>    // errno
 #include "Helper.h"
 #include "../../include/defines.h"
 
@@ -349,7 +349,7 @@ void ClassLogFile::RemoveOldLogFile()
             }
         }
     }
-    ESP_LOGD(TAG, "log files deleted: %d | files not deleted (incl. leer.txt): %d", deleted, notDeleted);	
+    ESP_LOGD(TAG, "log files deleted: %d \n files not deleted (incl. leer.txt): %d", deleted, notDeleted);	
     closedir(dir);
 }
 
@@ -399,10 +399,10 @@ void ClassLogFile::RemoveOldDataLog()
                 notDeleted ++;
             }
         }
-    ESP_LOGD(TAG, "data files deleted: %d | files not deleted (incl. leer.txt): %d", deleted, notDeleted);	
+    ESP_LOGD(TAG, "data files deleted: %d \n files not deleted (incl. leer.txt): %d", deleted, notDeleted);
     closedir(dir);
+ }
 }
-
 
 bool ClassLogFile::CreateLogDirectories()
 {
