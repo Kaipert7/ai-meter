@@ -1,3 +1,4 @@
+#include "configFile.h"   // <- stellt ConfigFile bereit
 #include "time_sntp.h"
 #include <string>
 #include <time.h>
