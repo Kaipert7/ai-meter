@@ -2,6 +2,10 @@
 #ifndef defines_h
 #define defines_h
 
+#ifndef TAG
+#define TAG "ai-meter"
+#endif
+
 /////////////////////////////////////////////
 ////          Global definitions         ////
 /////////////////////////////////////////////
