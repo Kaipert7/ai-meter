@@ -1,14 +1,15 @@
 #include "ClassLogFile.h"
 #include "time_sntp.h"
 #include "esp_log.h"
-#include <stfio.h>    // fopen, fputs, fclose, fileno
+#include <stio.h>    // fopen, fputs, fclose, fileno
 #include <unistd.h>   // fsync
 #include <string.h>     
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <algorithm>
 #include <errno.h>
-
+#include "Helper.h"
+#include "../../include/defines.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,10 +18,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-#include "Helper.h"
-#include "time_sntp.h"
-#include "../../include/defines.h"
 
 static const char *TAG = "LOGFILE";
 
