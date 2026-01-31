@@ -8,6 +8,7 @@
 #include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_log.h"
+static const char* TAG = "jomjol_time_sntp";
 #include "esp_attr.h"
 #include "esp_sleep.h"
 #include "esp_netif_sntp.h"
