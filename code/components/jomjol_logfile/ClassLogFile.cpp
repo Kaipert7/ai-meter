@@ -1,6 +1,6 @@
-// #include "ClassLogFile.h"
+#include "ClassLogFile.h"
 // #include "time_sntp.h"
-// #include "esp_log.h"
+#include "esp_log.h"
 #include <stdio.h>    // fopen, fputs, fclose, fileno
 #include <unistd.h>   // fsync
 #include <string.h>     
