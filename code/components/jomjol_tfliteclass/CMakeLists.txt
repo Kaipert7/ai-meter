@@ -1,7 +1,3 @@
-FILE(GLOB_RECURSE app_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
-
-idf_component_register(SRCS ${app_sources}
+idf_component_register(SRCS tflite_class.cpp
                     INCLUDE_DIRS "."
-                    REQUIRES jomjol_image_proc jomjol_logfile jomjol_flowcontroll jomjol_helper)
-
-
+                    REQUIRES tflm_wrapper esp-nn jomjol_image_proc jomjol_logfile jomjol_flowcontroll jomjol_helper)
