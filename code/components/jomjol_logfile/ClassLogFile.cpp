@@ -330,8 +330,17 @@ void ClassLogFile::RemoveOldLogFile()
             if ((strlen(entry->d_name) == strlen(cmpfilename)) && (strcmp(entry->d_name, cmpfilename) < 0)) {
                 //ESP_LOGD(TAG, "delete log file: %s", entry->d_name);
                 std::string filepath = logroot + "/" + entry->d_name;
-                if ((strcmp(entry->d_name, "log_1970-01-01.txt") == 0) && getTimeWasNotSetAtBoot()) { // keep logfile log_1970-01-01.txt if time was not set at boot (some boot logs are in there)
-                    //ESP_LOGD(TAG, "Skip deleting this file: %s", entry->d_name); 
+                if ((strcmp(entry->d_name, "log_1970-01-01.txt") == 0)) { 
+		             notDeleted++;
+				} else {
+					if (unlink(filepath.c_str()) ==0) {
+					    deletred++;
+					} else {
+						ESP_LOGE(TAG, "can't delete File: %s", entry->d_name);
+						notDeleted++;
+					}
+				}
+					
                     notDeleted++;
                 }
                 else {          
