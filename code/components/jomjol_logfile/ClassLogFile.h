@@ -1,5 +1,10 @@
 #pragma once
 
+class ClassLogFile {
+  // ...
+};
+extern ClassLogFile LogFile;  // <— Deklaration
+
 #ifndef CLASSLOGFILE_H
 #define CLASSLOGFILE_H
 
