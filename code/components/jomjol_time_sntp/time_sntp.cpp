@@ -1,4 +1,5 @@
 #include "configFile.h"   // <- stellt ConfigFile bereit
+#include "esp_netif_sntp.h"
 #include "time_sntp.h"
 #include <string>
 #include <time.h>
